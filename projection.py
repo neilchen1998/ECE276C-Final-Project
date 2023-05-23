@@ -19,7 +19,7 @@ def project_to_constraint(q_in, constraint_grad, lims, robot):
 		grad = constraint_grad(x)
 		qnext = qtemp-step_size*np.reshape(grad@J,(2,1))
 		qtemp = qnext
-	return q_out
+	return qtemp
 
 
 if __name__ == '__main__':
