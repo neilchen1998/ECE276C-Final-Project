@@ -148,5 +148,6 @@ if __name__ == "__main__":
     runTime = 30
     planner = 'RRTstar'
     objective = 'PathLength'
+    s, g = (0.0, 0.0), (1.5, 2.5)
 
-    plan(runTime, planner, objective, 'path.txt')
+    plan(runTime, planner, objective, s, g, 'path.txt')
