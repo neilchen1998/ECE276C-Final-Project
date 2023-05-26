@@ -68,7 +68,7 @@ def allocatePlanner(si, plannerType):
     else:
         ou.OMPL_ERROR("Planner-type is not implemented in allocation function.")
 
-def plan(runTime, plannerType, objectiveType, fname):
+def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), fname: str ='export'):
 
     """Plan the path using the specific type of planner
 
@@ -76,6 +76,8 @@ def plan(runTime, plannerType, objectiveType, fname):
     runTime -- the limit runtime
     plannerType -- the type of the planner: RRTstar, BFMTstar, BITstar, FMTstar, InformedRRTstar, PRMstar, SORRTstar
     objectiveType -- the type of the objective function: PathLength, PathClearance, ThresholdPathLength, WeightedLengthAndClearanceCombo
+    s -- the start position
+    g -- the goal position
     fname -- the name of the output file
     """
 
@@ -98,13 +100,13 @@ def plan(runTime, plannerType, objectiveType, fname):
 
     # set the starting point of the robot to be the bottom-left
     start = ob.State(space)
-    start[0] = 0.0
-    start[1] = 0.0
+    start[0] = s[0]
+    start[1] = s[1]
 
     # set the ending point of the robot to be the top-right
     goal = ob.State(space)
-    goal[0] = 0.0
-    goal[1] = 0.0
+    goal[0] = g[0]
+    goal[1] = g[1]
 
     # create a problem instance
     pdef = ob.ProblemDefinition(si)
