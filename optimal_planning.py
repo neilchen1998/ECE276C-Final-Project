@@ -126,8 +126,7 @@ def plan(runTime, plannerType, objectiveType, fname):
     if solved:
          
          # Output the solution info
-         print('{0} found solution of path length {1:.4f} with an optimization ' \
-             'objective value of {2:.4f}'.format( \
+         print('{0} found solution of path length {1:.4f} with an optimization objective value of {2:.4f}'.format( \
              optimizingPlanner.getName(), \
              pdef.getSolutionPath().length(), \
              pdef.getSolutionPath().cost(pdef.getOptimizationObjective()).value()))
