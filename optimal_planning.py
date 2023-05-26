@@ -5,6 +5,7 @@
 import sys
 from math import sqrt
 import argparse
+import numpy as np
 
 try:
     from ompl import util as ou
@@ -127,18 +128,22 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 
     if solved:
          
-         # Output the solution info
-         print('{0} found solution of path length {1:.4f} with an optimization objective value of {2:.4f}'.format( \
-             optimizingPlanner.getName(), \
-             pdef.getSolutionPath().length(), \
-             pdef.getSolutionPath().cost(pdef.getOptimizationObjective()).value()))
+        # Output the solution info
+        print('{0} found solution of path length {1:.4f} with an optimization objective value of {2:.4f}'.format( \
+            optimizingPlanner.getName(), \
+            pdef.getSolutionPath().length(), \
+            pdef.getSolutionPath().cost(pdef.getOptimizationObjective()).value()))
          
-         # check if a filename is provided
-         if fname:
-             
-             # export the solution path
-             with open(fname, 'w+') as outFile:
-                 outFile.write(pdef.getSolutionPath().printAsMatrix())
+        # get the solution path and convert it to numpy array type
+        path = pdef.getSolutionPath().printAsMatrix()
+        res = np.array(list(map(lambda x: np.fromstring(x, dtype=np.float32, sep=' '), path.split('\n'))))[:-2]
+        
+        # check if a filename is provided
+        if fname:
+            
+            # export the solution path
+            with open(fname, 'w+') as outFile:
+                outFile.write(pdef.getSolutionPath().printAsMatrix())
     
     else:
         print("No solution found.")
@@ -148,6 +153,6 @@ if __name__ == "__main__":
     runTime = 30
     planner = 'RRTstar'
     objective = 'PathLength'
-    s, g = (0.0, 0.0), (1.5, 2.5)
+    s, g = (0.0, 0.0), (1.0, 1.0)
 
     plan(runTime, planner, objective, s, g, 'path.txt')
