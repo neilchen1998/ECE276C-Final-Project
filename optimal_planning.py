@@ -66,6 +66,8 @@ def allocatePlanner(si, plannerType):
         return og.RRTstar(si)
     elif plannerType.lower() == "sorrtstar":
         return og.SORRTstar(si)
+    elif plannerType.lower() == 'rrt':
+        return og.RRT(si)
     else:
         ou.OMPL_ERROR("Planner-type is not implemented in allocation function.")
 
@@ -151,7 +153,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 if __name__ == "__main__":
 
     runTime = 30
-    planner = 'RRTstar'
+    planner = 'RRT'
     objective = 'PathLength'
     s, g = (0.0, 0.0), (1.0, 1.0)
 
