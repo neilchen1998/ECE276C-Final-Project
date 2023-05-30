@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from ompl import base as ob
+from ompl import util as ou
 from math import sqrt
 import sys
 
@@ -86,3 +87,50 @@ def getThresholdPathLengthObj(si):
     obj.setCostThreshold(ob.Cost(1.51))
     
     return obj
+
+class MyValidStateSampler(ob.ValidStateSampler):
+
+    def __init__(self, si):
+        super(MyValidStateSampler, self).__init__(si)
+        self.name_ = "my sampler"
+        self.rng_ = ou.RNG()
+
+    # Generate a sample in the valid part of the R^3 state space.
+    # Valid states satisfy the following constraints:
+    # -1<= x,y,z <=1
+    # if .25 <= z <= .5, then |x|>.8 and |y|>.8
+    def sample(self, state):
+        """Returns a sample in the valid part of the R^2 state space.
+        A valid states must follow the following constraints:
+        -1 <= x,y <=1
+        if x >= 0.5, then y > 0.8
+
+        Keyword arguments:
+        state -- the state of the robot
+        """
+        x = self.rng_.uniformReal(-1, 1)
+        if x >= 0.25:
+            y = self.rng_.uniformReal(0.8, 1)
+        else:
+            y = self.rng_.uniformReal(0, 1)
+        
+        # assign the value we generate to state
+        state[0] = x
+        state[1] = y
+        return True
+    
+def isStateValid(state):
+
+    """Check if the state is valid or not
+    A valid states must follow the following constraints:
+    -1 <= x,y <=1
+    if x >= 0.5, then y > 0.8
+
+    Keyword arguments:
+    state -- the state of the robot
+    """
+    if state[0] >= 0.5:
+        tmp = state[1] > 0.8
+        return (-1 <= state[0] <= 1) and (-1 <= state[0] <= 1) and tmp
+    else:
+        return False

@@ -71,6 +71,15 @@ def allocatePlanner(si, plannerType):
     else:
         ou.OMPL_ERROR("Planner-type is not implemented in allocation function.")
 
+def allocMyValidStateSampler(si):
+
+    """Returns an instance of my sampler
+
+    Keyword arguments:
+    si -- the system info
+    """
+    return MyValidStateSampler(si)
+
 def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), fname: str ='export'):
 
     """Plan the path using the specific type of planner
@@ -98,6 +107,9 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     # set the checker to check which states are valid
     validityChecker = ValidityChecker(si)
     si.setStateValidityChecker(validityChecker)
+
+    # set the sampler
+    si.setValidStateSamplerAllocator(ob.ValidStateSamplerAllocator(allocMyValidStateSampler))
 
     si.setup()
 
