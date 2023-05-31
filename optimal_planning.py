@@ -84,7 +84,7 @@ def allocMyValidStateSampler(si):
     """
     return MyValidStateSampler(si)
 
-def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), plannerRange: float = 0.1, fname: str ='export'):
+def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), fname: str ='export'):
 
     """Plan the path using the specific type of planner
 
@@ -141,8 +141,9 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     optimizingPlanner.setProblemDefinition(pdef)
     optimizingPlanner.setup()
 
-    # set the range that the planner suppose to use
-    optimizingPlanner.setRange(plannerRange)
+    # # set the range that the planner suppose to use
+    # # PRMStar does not have this attribute
+    # optimizingPlanner.setRange(plannerRange)
 
     # attempt to solve the problem within the given runtime
     solved = optimizingPlanner.solve(runTime)
@@ -177,8 +178,9 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 if __name__ == "__main__":
 
     runTime = 30
-    planner = 'RRT'
+    planner = 'PRMStar'
     objective = 'PathLength'
     s, g = (0.0, 0.0), (1.0, 1.0)
+    fname = 'path-PRMStar'
 
-    plan(runTime, planner, objective, s, g, fname='path')
+    plan(runTime, planner, objective, s, g, fname=fname)

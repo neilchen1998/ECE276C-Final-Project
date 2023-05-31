@@ -3,7 +3,7 @@ import numpy as np
 
 if __name__ == "__main__":
 
-    data = np.load('path.npy', allow_pickle=True)
+    data = np.load('path-PRMStar.npy', allow_pickle=True)
     radius = 0.25
     points_whole_ax = 5 * 0.8 * 72    # 1 point = dpi / 72 pixels
     points_radius = 2 * radius / 1.0 * points_whole_ax
@@ -15,5 +15,5 @@ if __name__ == "__main__":
             y_values = [data[i-1][1], data[i][1]]
             plt.plot(x_values, y_values, linestyle="--")
 
-    plt.title('RRT with 0.1 Range')
+    plt.title('PRMStar')
     plt.show()
