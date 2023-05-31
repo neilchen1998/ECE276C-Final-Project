@@ -161,7 +161,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
         if fname:
             
             # export the solution path
-            with open(fname, 'w+') as outFile:
+            with open('{}.txt'.format(fname), 'w+') as outFile:
                 outFile.write(pdef.getSolutionPath().printAsMatrix())
     
     else:
@@ -174,4 +174,4 @@ if __name__ == "__main__":
     objective = 'PathLength'
     s, g = (0.0, 0.0), (1.0, 1.0)
 
-    plan(runTime, planner, objective, s, g, 'path.txt')
+    plan(runTime, planner, objective, s, g, 'path')
