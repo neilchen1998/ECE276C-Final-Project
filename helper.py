@@ -5,6 +5,8 @@ from ompl import util as ou
 from math import sqrt
 import sys
 
+# source https://ompl.kavrakilab.org/StateSampling_8py_source.html
+
 class ValidityChecker(ob.StateValidityChecker):
 
     def clearance(self, state) -> float:
