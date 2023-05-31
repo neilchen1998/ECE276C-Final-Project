@@ -155,7 +155,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
         res = np.array(list(map(lambda x: np.fromstring(x, dtype=np.float32, sep=' '), path.split('\n'))))[:-2]
         
         # save it to npy file
-        np.save('path.npy', res)
+        np.save('{}.npy'.format(fname), res)
         
         # check if a filename is provided
         if fname:
