@@ -177,4 +177,4 @@ if __name__ == "__main__":
     objective = 'PathLength'
     s, g = (0.0, 0.0), (1.0, 1.0)
 
-    plan(runTime, planner, objective, s, g, 'path')
+    plan(runTime, planner, objective, s, g, fname='path')
