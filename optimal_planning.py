@@ -148,9 +148,14 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
             pdef.getSolutionPath().length(), \
             pdef.getSolutionPath().cost(pdef.getOptimizationObjective()).value()))
          
-        # get the solution path and convert it to numpy array type
+        # get the solution path
         path = pdef.getSolutionPath().printAsMatrix()
+
+        # convert it to numpy array type
         res = np.array(list(map(lambda x: np.fromstring(x, dtype=np.float32, sep=' '), path.split('\n'))))[:-2]
+        
+        # save it to npy file
+        np.save('path.npy', res)
         
         # check if a filename is provided
         if fname:
