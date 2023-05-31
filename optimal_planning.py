@@ -22,6 +22,10 @@ except ImportError:
 
 from helper import *
 
+# ignore warnings
+import warnings
+warnings.filterwarnings("ignore")
+
 def allocateObjective(si, objectiveType):
 
     """Select the desired objective function
