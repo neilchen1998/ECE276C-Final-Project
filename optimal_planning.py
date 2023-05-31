@@ -112,8 +112,9 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     validityChecker = ValidityChecker(si)
     si.setStateValidityChecker(validityChecker)
 
-    # set the sampler
-    si.setValidStateSamplerAllocator(ob.ValidStateSamplerAllocator(allocMyValidStateSampler))
+    # # set the sampler
+    # # RRT does not support any custom state sampler
+    # si.setValidStateSamplerAllocator(ob.ValidStateSamplerAllocator(allocMyValidStateSampler))
 
     si.setup()
 
