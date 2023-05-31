@@ -137,6 +137,9 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     optimizingPlanner.setProblemDefinition(pdef)
     optimizingPlanner.setup()
 
+    # set the range that the planner suppose to use
+    optimizingPlanner.setRange(0.1)
+
     # attempt to solve the problem within the given runtime
     solved = optimizingPlanner.solve(runTime)
 
