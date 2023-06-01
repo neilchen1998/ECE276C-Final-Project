@@ -1,0 +1,18 @@
+generate a bunch of random gaussian points and project to constraint
+pretrain network on dataset
+run rrt and store all generated points
+add points to dataset
+retrain network on dataset
+repeat from line 3
+
+
+
+network[
+    encoder[]
+    decoder[]
+    dataset[]
+
+    generate(noise)
+    train()
+    export_data()
+]
