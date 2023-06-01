@@ -28,21 +28,23 @@ def project_to_constraint(q_in, constraint_grad, lims, robot):
 	qtemp = np.reshape(qtemp, (2,))
 	return qtemp
 
-def project_to_constraint_scipy(q_in, constraint,consttype, lims, robot):
+def project_to_constraint_scipy(q_in, constraints,consttypes, lims, robot):
 	"""
 	:param q_in: q-space point to be projected, as (2,)
-	:param constraint: constraint function on c-space
-	:param consttype: 'eq' for equality, 'ineq' for inequality
+	:param constraints: list of constraint functions on c-space
+	:param consttypes: list of types'eq' for equality, 'ineq' for inequality
 	:param lims: joint limits as list of tuples
 	:param robot: robot for fkine
 	:return: the closest point on the constrained space to the given point
 	"""
 	def loss(x):
 		return np.linalg.norm(np.reshape(q_in,x.shape)-x)
-	def my_constraint(q):
-		x = robot.fkine(np.reshape(q,(2,)))
-		return constraint(x)
-	consts = [{'type':consttype,'fun':my_constraint},]
+	consts  = []
+	for i in range(len(constraints)):
+		c = constraints[i]
+		t = consttypes[i]
+		item = {'type':t,'fun':(lambda q: c(robot.fkine(np.reshape(q,(2,)))))}
+		consts.append(item)
 	qout = opti.minimize(loss,np.reshape(q_in,(2,)),method='slsqp',bounds=lims,constraints=consts,options={'disp':False, 'ftol':1e-6, 'maxiter':2000})
 	return qout.x
 
@@ -75,19 +77,19 @@ if __name__ == '__main__':
 	rob = rtb.models.DH.Planar2()
 	rob.plot(np.reshape(q,(2,)))
 	#qout = project_to_constraint(q, constr, lim, rob)
-	#qout = project_to_constraint_scipy(q,constr2,'ineq',lim,rob)
-	#rob.plot(qout)
+	qout = project_to_constraint_scipy(q,[constr2],['ineq'],lim,rob)
+	rob.plot(qout)
 
-	fig = plt.figure()
-	deg = np.pi/180
-	start_t = time.time()
-	for i in range(90):
-		for j in range(90):
-			q = np.array([4*i*deg,4*j*deg])-np.pi
-			q = np.reshape(q,(2,1))
-			qout = project_to_constraint(q,constr,lim,rob)
+	#fig = plt.figure()
+	#deg = np.pi/180
+	#start_t = time.time()
+	#for i in range(90):
+	#	for j in range(90):
+	#		q = np.array([4*i*deg,4*j*deg])-np.pi
+	#		q = np.reshape(q,(2,1))
+	#		qout = project_to_constraint(q,constr,lim,rob)
 	#		qout = project_to_constraint_scipy(q, constr2, 'ineq', lim, rob)
-			print(i,',',j)
-	print(start_t)
-	print(time.time())
+	#		print(i,',',j)
+	#print(start_t)
+	#print(time.time())
 	print('hello world')
