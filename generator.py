@@ -27,7 +27,6 @@ class Baseline_Generator(Generator):
     Generator which just projects samples to constrained space
     """
     def __init__(self):
-        # i need to hardcode these
         self.robot = rtb.models.DH.Planar2()
         def constr2(X):
             x = X.t
@@ -60,17 +59,14 @@ class VAE_Generator(Generator):
     """
     Generator which uses VAE to generate samples on the constraint
     """
-    def __init__(self,constraints,constr_types,joint_lims,robot):
-        '''
-        constraints: a list of constraint functions that take a cartesian space point as input
-        constr_types: list of types 'eq' for equality, 'ineq' for inequality
-        joint_lims: the joint limits of the robot as a list of tuples [(min,max),...]
-        robot: the robot used for fkine
-        '''
-        self.robot = robot
-        self.constraints = constraints
-        self.constr_types = constr_types
-        self.j_lims = joint_lims
+    def __init__(self):
+        self.robot = rtb.models.DH.Planar2()
+        def constr2(X):
+            x = X.t
+            return 0.5-x[0]
+        self.constraints = [constr2]
+        self.constr_types = ['ineq']
+        self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi)]
         self.encoder = VAE_Encoder()
         self.decoder = VAE_Decoder()
         self.data = np.empty((2,))
