@@ -4,6 +4,8 @@ from ompl import base as ob
 from ompl import util as ou
 from math import sqrt
 import sys
+import numpy as np
+from generator import *
 
 # source https://ompl.kavrakilab.org/StateSampling_8py_source.html
 
@@ -90,11 +92,29 @@ def getThresholdPathLengthObj(si):
     
     return obj
 
-class MyStateSampler(ob.StateSampler):
+class MyBaselineStateSampler(ob.StateSampler):
 
     def __init__(self, si):
-        super(MyStateSampler, self).__init__(si)
-        self.name_ = "my sampler"
+        super(MyBaselineStateSampler, self).__init__(si)
+        self.name_ = "my baseline sampler"
+        self.rng_ = ou.RNG()
+        self.gen_ = Baseline_Generator()
+
+    def sampleUniform(self, state):
+
+        vec = self.gen_.generate(np.array([self.rng_.uniformReal(0, 1), self.rng_.uniformReal(0, 1)]))
+
+        x, y = vec[0], vec[1]
+        
+        # assign the value we generate to state
+        state[0] = x
+        state[1] = y
+
+class MyVAEStateSampler(ob.StateSampler):
+
+    def __init__(self, si):
+        super(MyVAEStateSampler, self).__init__(si)
+        self.name_ = "my VAE sampler"
         self.rng_ = ou.RNG()
 
     def sampleUniform(self, state):
