@@ -23,7 +23,7 @@ class ValidityChecker(ob.StateValidityChecker):
         x = state[0]
         y = state[1]
 
-        return sqrt((x-0.5)*(x-0.5) + (y-0.5)*(y-0.5)) - 0.25
+        return sqrt((x-0.5)**2 + (y-0.5)**2) - 0.25
     
     def isValid(self, state) -> bool:
 
