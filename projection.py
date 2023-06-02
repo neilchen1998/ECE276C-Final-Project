@@ -69,16 +69,22 @@ if __name__ == '__main__':
 			grad[0, 0] = x[0]
 		return grad
 
+
+
 	def constr2(X):
 		x = X.t
-		return -x[0]
+		return 0.5-x[0]
 
 	lim = [(-np.pi, np.pi), (-np.pi, np.pi)]
 	rob = rtb.models.DH.Planar2()
-	rob.plot(np.reshape(q,(2,)))
+
+	[constr2],['ineq'],lim,rob
+
+
+	#rob.plot(np.reshape(q,(2,)))
 	#qout = project_to_constraint(q, constr, lim, rob)
 	qout = project_to_constraint_scipy(q,[constr2],['ineq'],lim,rob)
-	rob.plot(qout)
+	#rob.plot(qout)
 
 	#fig = plt.figure()
 	#deg = np.pi/180
