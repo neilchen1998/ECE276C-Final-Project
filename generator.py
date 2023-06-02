@@ -29,8 +29,11 @@ class Baseline_Generator(Generator):
     def __init__(self):
         self.robot = rtb.models.DH.Planar2()
         def constr2(X):
-            x = X.t
-            return 0.5-x[0]
+            rot = X.angvec()
+            ang = (np.pi/2) -abs(rot[0])
+            ang = abs(ang)
+            ang_diff = (np.pi/4)-ang
+            return ang_diff
         self.constraints = [constr2]
         self.constr_types = ['ineq']
         self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi)]
@@ -62,15 +65,18 @@ class VAE_Generator(Generator):
     def __init__(self):
         self.robot = rtb.models.DH.Planar2()
         def constr2(X):
-            x = X.t
-            return 0.5-x[0]
+            rot = X.angvec()
+            ang = (np.pi/2) -abs(rot[0])
+            ang = abs(ang)
+            ang_diff = (np.pi/4)-ang
+            return ang_diff
         self.constraints = [constr2]
         self.constr_types = ['ineq']
         self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi)]
         self.encoder = VAE_Encoder()
         self.decoder = VAE_Decoder()
         self.data = np.empty((2,))
-        #generate first random points
+        #read 
         self.train()
     def generate(self,seed):
         pass
@@ -79,3 +85,5 @@ class VAE_Generator(Generator):
     def save_dataset(self):
         return self.data
     
+if __name__ == '__main__':
+    gen = Baseline_Generator()
