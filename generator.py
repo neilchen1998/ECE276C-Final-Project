@@ -6,6 +6,12 @@ class Generator(ABC):
     Abstract base class for generators
     """
     @abstractmethod
+    def __init__(self,constraints,constr_types,joint_lims,robot):
+        '''
+        initialize
+        '''
+        pass
+    @abstractmethod
     def generate(self,seed):
         '''
         takes in a random seed and returns a sample
