@@ -88,8 +88,6 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     fname -- the name of the output file
     """
 
-    assert(runTime > 0.0, 'the value of runtime should be greater than 0.0')
-
     # construct the state space of the robot
     space = ob.RealVectorStateSpace(2)
 
@@ -97,7 +95,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     space.setBounds(0.0, 1.0)
 
     # set the state sampler allocator
-    space.setStateSamplerAllocator(ob.StateSamplerAllocator(MyStateSampler))
+    space.setStateSamplerAllocator(ob.StateSamplerAllocator(MyBaselineStateSampler))
 
     # construct a state information instance
     si = ob.SpaceInformation(space)
