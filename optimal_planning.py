@@ -82,7 +82,7 @@ def allocMyValidStateSampler(si):
     Keyword arguments:
     si -- the system info
     """
-    return MyValidStateSampler(si)
+    return MyBaselineStateSampler(si)
 
 def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), fname: str ='export'):
 
@@ -96,8 +96,6 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     g -- the goal position
     fname -- the name of the output file
     """
-
-    assert(runTime > 0.0, 'the value of runtime should be greater than 0.0')
 
     # construct the state space of the robot
     space = ob.RealVectorStateSpace(2)
