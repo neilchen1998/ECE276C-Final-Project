@@ -4,6 +4,8 @@ from ompl import base as ob
 from ompl import util as ou
 from math import sqrt
 import sys
+import numpy as np
+from generator import *
 
 # source https://ompl.kavrakilab.org/StateSampling_8py_source.html
 
@@ -90,12 +92,13 @@ def getThresholdPathLengthObj(si):
     
     return obj
 
-class MyValidStateSampler(ob.ValidStateSampler):
+class MyBaselineStateSampler(ob.ValidStateSampler):
 
     def __init__(self, si):
-        super(MyValidStateSampler, self).__init__(si)
-        self.name_ = "my sampler"
+        super(MyBaselineStateSampler, self).__init__(si)
+        self.name_ = "my baseline sampler"
         self.rng_ = ou.RNG()
+        self.gen_ = Baseline_Generator()
 
     # Generate a sample in the valid part of the R^3 state space.
     # Valid states satisfy the following constraints:
@@ -110,11 +113,10 @@ class MyValidStateSampler(ob.ValidStateSampler):
         Keyword arguments:
         state -- the state of the robot
         """
-        x = self.rng_.uniformReal(-1, 1)
-        if x >= 0.25:
-            y = self.rng_.uniformReal(0.8, 1)
-        else:
-            y = self.rng_.uniformReal(0, 1)
+
+        vec = self.gen_.generate(np.array([self.rng_.uniformReal(0, 1), self.rng_.uniformReal(0, 1)]))
+
+        x, y = vec[0], vec[1]
         
         # assign the value we generate to state
         state[0] = x
