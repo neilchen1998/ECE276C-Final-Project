@@ -115,6 +115,9 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 
     si.setup()
 
+    # export the planner data
+    planner_data = ob.PlannerData(si)
+
     # set the starting point of the robot to be the bottom-left
     start = ob.State(space)
     start[0] = s[0]
@@ -169,6 +172,13 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
             # export the solution path
             with open('{}.txt'.format(fname), 'w+') as outFile:
                 outFile.write(pdef.getSolutionPath().printAsMatrix())
+
+        # update the planner data
+        # optimizingPlanner.getPlannerData(planner_data)
+        # for i in range(planner_data.numVertices()):
+        #     # TODO: export the state to of numpy format
+        #     x, y = planner_data.getVertex(i).getState()[0]
+
     
     else:
         print("No solution found.")
