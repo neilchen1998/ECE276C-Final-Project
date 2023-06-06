@@ -100,8 +100,8 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     # construct the state space of the robot
     space = ob.RealVectorStateSpace(2)
 
-    # set the bound of the space to be in [0, 1]
-    space.setBounds(0.0, 1.0)
+    # set the bound of the space to be in [-np.pi, np.pi]
+    space.setBounds(-np.pi, np.pi)
 
     # construct a state information instance
     si = ob.SpaceInformation(space)
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     runTime = 30
     planner = 'PRMStar'
     objective = 'PathLength'
-    s, g = (0.0, 0.0), (1.0, 1.0)
+    s, g = (np.pi/4, 0.0), (0.75*np.pi, -np.pi/2)
     fname = 'path-PRMStar'
 
     plan(runTime, planner, objective, s, g, fname=fname)
