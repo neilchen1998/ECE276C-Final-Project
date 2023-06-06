@@ -6,7 +6,7 @@ if __name__ == "__main__":
     data = np.load('path-PRMStar.npy', allow_pickle=True)
 
     plt.figure(figsize=[5, 5])
-    ax = plt.axes([0.1, 0.1, 0.8, 0.8], xlim=(0, 1), ylim=(0, 1))
+    ax = plt.axes([0.1, 0.1, 0.8, 0.8], xlim=(-np.pi, np.pi), ylim=(-np.pi, np.pi))
     points_whole_ax = 5 * 0.8 * 72    # 1 point = dpi / 72 pixels
     radius = 0.25
     points_radius = 2 * radius / 1.0 * points_whole_ax
