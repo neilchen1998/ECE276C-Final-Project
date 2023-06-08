@@ -142,9 +142,21 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     optimizingPlanner.setProblemDefinition(pdef)
     optimizingPlanner.setup()
 
-    # # set the range that the planner suppose to use
-    # # PRMStar does not have this attribute
-    # optimizingPlanner.setRange(plannerRange)
+    def myFilter(a, b) -> bool:
+
+        '''Rejects connections if the difference between two node are larger than a threshold
+
+        Keyword arguments:
+        a -- vertex a
+        b -- vertex b
+        '''
+
+        if (abs(a - b) > 100):
+            return False
+        else:
+            return True
+
+    optimizingPlanner.setConnectionFilter(og.ConnectionFilter(myFilter))
 
     # attempt to solve the problem within the given runtime
     solved = optimizingPlanner.solve(runTime)
