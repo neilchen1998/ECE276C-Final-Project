@@ -46,7 +46,6 @@ def allocateObjective(si, objectiveType):
     else:
         ou.OMPL_ERROR("Optimization-objective is not implemented in allocation function.")
 
-
 def allocatePlanner(si, plannerType):
 
     """Select the desired planner type
@@ -84,6 +83,7 @@ def allocMyValidStateSampler(si):
     Keyword arguments:
     si -- the system info
     """
+
     return MyBaselineStateSampler(si)
 
 def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), fname: str ='export'):
@@ -144,6 +144,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     optimizingPlanner.setProblemDefinition(pdef)
     optimizingPlanner.setup()
 
+    # set up a custom filter that filter out nodes that are too far away from each other
     def myFilter(a, b) -> bool:
 
         '''Rejects connections if the distance between two node are larger than a threshold
@@ -167,6 +168,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     # attempt to solve the problem within the given runtime
     solved = optimizingPlanner.solve(runTime)
 
+    # check if a solution has been found
     if solved:
          
         # Output the solution info
