@@ -25,16 +25,43 @@ class ValidityChecker(ob.StateValidityChecker):
 
         return sqrt((x-0.5)**2 + (y-0.5)**2) - 0.25
     
-    def isValid(self, state) -> bool:
+    def isUpright(self, state) -> bool:
 
-        """Returns whether the position of the given state overlaps the circular obstacle
+        """Returns whether the cup is upright
 
         Keyword arguments:
         state -- the given state
         """
 
-        return self.clearance(state) > 0.0
+        # extract the values of x & y
+        x = state[0]
+        y = state[1]
+
+        robot = rtb.models.DH.Planar2()
+
+        # calculate the difference of the angles
+        def constr2(X):
+            rot = X.angvec()
+            if (np.isnan(rot[0])):
+                    return 0.0
+            ang = (np.pi/2) -rot[0]*np.sign(np.sum(rot[1]))
+            ang = abs(ang)
+            ang_diff = (np.pi/4)-ang
+            return ang_diff
+
+        return constr2(robot.fkine([x,y])) >= 0
     
+    def isValid(self, state) -> bool:
+
+        """Returns whether the state is valid or not
+        The state must not be too close to the obstacles
+        and the cup must be upright 
+
+        Keyword arguments:
+        state -- the given state
+        """
+        
+        return self.clearance(state) > 0.0 and self.isUpright(state)   
 
 class ClearanceObjective(ob.StateCostIntegralObjective):
 
