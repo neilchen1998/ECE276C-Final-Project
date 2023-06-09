@@ -210,7 +210,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 
 if __name__ == "__main__":
 
-    runTime = 30
+    runTime = 60
     planner = 'PRM'
     objective = 'PathLength'
     s, g = (np.pi/4, 0.0), (0.75*np.pi, -np.pi/2)
