@@ -146,14 +146,18 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 
     def myFilter(a, b) -> bool:
 
-        '''Rejects connections if the difference between two node are larger than a threshold
+        '''Rejects connections if the distance between two node are larger than a threshold
 
         Keyword arguments:
         a -- vertex a
         b -- vertex b
         '''
 
-        if (abs(a - b) > 100):
+        # update the planner
+        optimizingPlanner.getPlannerData(planner_data)
+
+        # check the distance between two nodes
+        if (optimizingPlanner.distanceFunction(a, b) > np.pi/8):
             return False
         else:
             return True
