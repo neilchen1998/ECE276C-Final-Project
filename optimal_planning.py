@@ -64,6 +64,8 @@ def allocatePlanner(si, plannerType):
         return og.FMT(si)
     elif plannerType.lower() == "informedrrtstar":
         return og.InformedRRTstar(si)
+    elif plannerType.lower() == "prm":
+        return og.PRM(si)
     elif plannerType.lower() == "prmstar":
         return og.PRMstar(si)
     elif plannerType.lower() == "rrtstar":
@@ -198,9 +200,9 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 if __name__ == "__main__":
 
     runTime = 30
-    planner = 'PRMStar'
+    planner = 'PRM'
     objective = 'PathLength'
     s, g = (np.pi/4, 0.0), (0.75*np.pi, -np.pi/2)
-    fname = 'path-PRMStar'
+    fname = 'path-PRM'
 
     plan(runTime, planner, objective, s, g, fname=fname)

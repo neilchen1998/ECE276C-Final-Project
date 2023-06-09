@@ -3,7 +3,7 @@ import numpy as np
 
 if __name__ == "__main__":
 
-    data = np.load('path-PRMStar.npy', allow_pickle=True)
+    data = np.load('path-PRM.npy', allow_pickle=True)
 
     plt.figure(figsize=[5, 5])
     ax = plt.axes([0.1, 0.1, 0.8, 0.8], xlim=(-np.pi, np.pi), ylim=(-np.pi, np.pi))
@@ -19,6 +19,6 @@ if __name__ == "__main__":
             y_values = [data[i-1][1], data[i][1]]
             plt.plot(x_values, y_values, linestyle="--")
 
-    plt.title('PRMStar')
+    plt.title('PRM')
     plt.grid()
     plt.show()
