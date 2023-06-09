@@ -192,12 +192,19 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
                 outFile.write(pdef.getSolutionPath().printAsMatrix())
 
         # update the planner data
-        # optimizingPlanner.getPlannerData(planner_data)
-        # for i in range(planner_data.numVertices()):
-        #     # TODO: export the state to of numpy format
-        #     x, y = planner_data.getVertex(i).getState()[0]
+        optimizingPlanner.getPlannerData(planner_data)
 
-    
+        # get the number of samples (vertices)
+        numSamples = planner_data.numVertices()
+
+        # export all samples to an numpy array
+        export = np.zeros((numSamples, 2))
+        for i in range(planner_data.numVertices()):
+            export[i, 0] = planner_data.getVertex(i).getState()[0]
+            export[i, 1] = planner_data.getVertex(i).getState()[1]
+
+        np.save('{}-samples.npy'.format(fname), export)
+
     else:
         print("No solution found.")
 
