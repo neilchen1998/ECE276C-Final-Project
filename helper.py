@@ -117,19 +117,3 @@ class MyBaselineStateSampler(ob.ValidStateSampler):
         state[1] = vec[1]
 
         return True
-    
-def isStateValid(state):
-
-    """Check if the state is valid or not
-    A valid states must follow the following constraints:
-    -1 <= x,y <=1
-    if x >= 0.5, then y > 0.8
-
-    Keyword arguments:
-    state -- the state of the robot
-    """
-    if state[0] >= 0.5:
-        tmp = state[1] > 0.8
-        return (-1 <= state[0] <= 1) and (-1 <= state[0] <= 1) and tmp
-    else:
-        return False
