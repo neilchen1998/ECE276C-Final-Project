@@ -100,27 +100,22 @@ class MyBaselineStateSampler(ob.ValidStateSampler):
         self.rng_ = ou.RNG()
         self.gen_ = Baseline_Generator()
 
-    # Generate a sample in the valid part of the R^3 state space.
-    # Valid states satisfy the following constraints:
-    # -1<= x,y,z <=1
-    # if .25 <= z <= .5, then |x|>.8 and |y|>.8
     def sample(self, state):
-        """Returns a sample in the valid part of the R^2 state space.
-        A valid states must follow the following constraints:
-        -1 <= x,y <=1
-        if x >= 0.5, then y > 0.8
+    
+        """Returns a sample in the valid part of the R^2 state space using 
+        the custom generator
 
         Keyword arguments:
         state -- the state of the robot
         """
 
-        vec = self.gen_.generate(np.array([self.rng_.uniformReal(0, 1), self.rng_.uniformReal(0, 1)]))
+        # CAUTION: the points generated from the generator may be illegal
+        vec = self.gen_.generate(np.array([self.rng_.gaussian01(), self.rng_.gaussian01()]))
 
-        x, y = vec[0], vec[1]
-        
         # assign the value we generate to state
-        state[0] = x
-        state[1] = y
+        state[0] = vec[0]
+        state[1] = vec[1]
+
         return True
     
 def isStateValid(state):
