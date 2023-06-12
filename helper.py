@@ -6,6 +6,14 @@ from math import sqrt
 import sys
 import numpy as np
 from generator import *
+import spatialmath as smb
+from spatialgeometry import Cuboid
+from two_link import *
+
+two_link = TwoLink()
+obstacles = []
+obstacles.append(Cuboid(scale=[2, 1, 1],\
+                pose=smb.SE3(0, 18, 0), collision = True))
 
 # source https://ompl.kavrakilab.org/StateSampling_8py_source.html
 
@@ -13,7 +21,7 @@ class ValidityChecker(ob.StateValidityChecker):
 
     def clearance(self, state) -> float:
 
-        """Returns the distance from the position of the given state to the boundary of the circle
+        """Returns whetheer the robot is in the clear or not
 
         Keyword arguments:
         state -- the given state
@@ -23,7 +31,13 @@ class ValidityChecker(ob.StateValidityChecker):
         x = state[0]
         y = state[1]
 
-        return sqrt((x-0.5)**2 + (y-0.5)**2) - 0.25
+        # check all obstacles
+        for obs in obstacles:
+
+            if (two_link.iscollided([x, y], obs)):
+                return False
+
+        return True
     
     def isUpright(self, state) -> bool:
 
@@ -61,7 +75,7 @@ class ValidityChecker(ob.StateValidityChecker):
         state -- the given state
         """
         
-        return self.clearance(state) > 0.0 and self.isUpright(state)   
+        return self.clearance(state) and self.isUpright(state)   
 
 class ClearanceObjective(ob.StateCostIntegralObjective):
 
