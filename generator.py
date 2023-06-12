@@ -6,6 +6,10 @@ import numpy as np
 import roboticstoolbox as rtb
 import os
 from matplotlib import pyplot as plt
+import time
+
+HIDDEN = 10
+LATENT = 6
 
 class Generator(ABC):
     """
@@ -39,26 +43,26 @@ class Baseline_Generator(Generator):
         self.constraints = [constr2]
         self.constr_types = ['ineq']
         self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi)]
-        self.dataset = np.load('dataset.npy')
-        self.raw = np.load('unprojected.npy')
+        #self.dataset = np.load('dataset.npy')
+        #self.raw = np.load('unprojected.npy')
     
     def generate(self,seed):
         '''
         takes in a random seed as np.array of shape (2,) and returns a sample
         '''
         sample = project(seed,self.constraints,self.constr_types,self.j_lims,self.robot)
-        dataset = np.load('dataset.npy')
-        dataset = np.vstack([dataset,sample])
-        raw = np.load('unprojected.npy')
-        raw = np.vstack([raw,seed])
-        np.save('dataset.npy',dataset)
-        np.save('unprojected.npy',raw)
+        #dataset = np.load('dataset.npy')
+        #dataset = np.vstack([dataset,sample])
+        #raw = np.load('unprojected.npy')
+        #raw = np.vstack([raw,seed])
+        #np.save('dataset.npy',dataset)
+        #np.save('unprojected.npy',raw)
         return sample
 
 
 ##Todo
 class VAE_Encoder(torch.nn.Module):
-    def __init__(self,num_joints,hidden_size):
+    def __init__(self,num_joints,hidden_size,latent_size):
         super(VAE_Encoder,self).__init__()
         self.linear1 = torch.nn.Linear(num_joints,hidden_size)
         self.relu1 = torch.nn.ReLU()
@@ -66,8 +70,8 @@ class VAE_Encoder(torch.nn.Module):
         self.relu2 = torch.nn.ReLU()
         self.linear3 = torch.nn.Linear(1,hidden_size)
         self.relu3 = torch.nn.ReLU()
-        self.linear_mu = torch.nn.Linear(hidden_size,num_joints)
-        self.linear_sigma = torch.nn.Linear(hidden_size,num_joints)
+        self.linear_mu = torch.nn.Linear(hidden_size,latent_size)
+        self.linear_sigma = torch.nn.Linear(hidden_size,latent_size)
     def forward(self,q):
         h = self.relu1(self.linear1(q))
         h = self.relu3(h+self.linear3(self.relu2(self.linear2(h))))
@@ -76,9 +80,9 @@ class VAE_Encoder(torch.nn.Module):
         return mu,sigma
 ##Todo
 class VAE_Decoder(torch.nn.Module):
-    def __init__(self,num_joints,hidden_size):
+    def __init__(self,num_joints,hidden_size,latent_size):
         super(VAE_Decoder,self).__init__()
-        self.linear1 = torch.nn.Linear(num_joints,hidden_size)
+        self.linear1 = torch.nn.Linear(latent_size,hidden_size)
         self.relu1 = torch.nn.ReLU()
         self.linear2 = torch.nn.Linear(hidden_size,1)
         self.relu2 = torch.nn.ReLU()
@@ -92,10 +96,10 @@ class VAE_Decoder(torch.nn.Module):
         return x
     
 class VAE_model(torch.nn.Module):
-    def __init__(self,num_joints,hidden_size):
+    def __init__(self,num_joints,hidden_size,latent_size):
         super(VAE_model,self).__init__()
-        self.encoder = VAE_Encoder(num_joints,hidden_size)
-        self.decoder = VAE_Decoder(num_joints,hidden_size)
+        self.encoder = VAE_Encoder(num_joints,hidden_size,latent_size)
+        self.decoder = VAE_Decoder(num_joints,hidden_size,latent_size)
     
     def forward(self,q):
         mu,sigma = self.encoder(q)
@@ -124,7 +128,7 @@ class VAE_Generator(Generator):
         self.constraints = [constr2]
         self.constr_types = ['ineq']
         self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi)]
-        self.model = VAE_model(num_joints=2,hidden_size=3)
+        self.model = VAE_model(num_joints=2,hidden_size=HIDDEN,latent_size=LATENT)
         files = os.listdir(os.getcwd())
         pretrained_file = 'pretrained.tar'
         if pretrained_file in files:
@@ -132,11 +136,11 @@ class VAE_Generator(Generator):
             self.model.load_state_dict(checkpoint['model_state_dict'])
         else:
             self.dataset = np.load('dataset.npy')
-            self.train(1000,4096)
+            self.train(400,4096)
     def generate(self,seed):
         sample = self.model.generate(seed)
-        #projected = project(sample,self.constraints,self.constr_types,self.j_lims,self.robot)
-        projected = sample
+        projected = project(sample,self.constraints,self.constr_types,self.j_lims,self.robot)
+        #projected = sample
         #dataset = np.load('dataset.npy')
         #dataset = np.vstack(dataset,projected)
         #np.save('dataset.npy',dataset)
@@ -145,7 +149,7 @@ class VAE_Generator(Generator):
         #np.save('generated.npy',generated)
         return projected
     def train(self,num_epochs,samples_per_batch):
-        optim = torch.optim.Adam(self.model.parameters(),lr=0.01,betas=[0.9,0.999999])
+        optim = torch.optim.Adam(self.model.parameters(),lr=0.001,betas=[0.9,0.999999])
         sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optim,'min',threshold=0.001,min_lr=10**(-10))
         for epoch in range(num_epochs):
             self.model.train()
@@ -168,7 +172,7 @@ class VAE_Generator(Generator):
                 print('batch ',i+1,' of ',num_batches,' in epoch ',epoch)
                 print('training loss: ',loss.item())
         print('done training')
-        torch.save({'model_state_dict':self.model.state_dict()},os.path.join(os.getcwd(),'pretrained.tar'))
+        #torch.save({'model_state_dict':self.model.state_dict()},os.path.join(os.getcwd(),'pretrained.tar'))
     
 if __name__ == '__main__':
     '''data = np.zeros((1,2))
@@ -203,11 +207,26 @@ if __name__ == '__main__':
         dataset = np.vstack([dataset,data])
     dataset = dataset[1:,:]
     np.save('dataset.npy',dataset)
-    vae = VAE_Generator()
-    outs = np.zeros((2,))
-    for i in range(1000):
-        out = vae.generate(np.random.normal(0,1,(2,)))
-        outs = np.vstack([outs,out])
-    plt.scatter(outs[:,0],outs[:,1])
-    plt.show()
-    test=True
+    for h in range(1,15):
+        for l in range(1,15):
+            print('h{}l{}'.format(h,l))
+            HIDDEN=h
+            LATENT=l
+            vae = VAE_Generator()
+            gen = Baseline_Generator()
+            outs = np.zeros((2,))
+            #start_t = time.time_ns()
+            for i in range(1800):
+                if i%100==0:
+                    print(i)
+                out = vae.generate(np.random.normal(0,1,(LATENT,)))
+                #out = gen.generate(np.random.normal(0,1,(2,)))
+                outs = np.vstack([outs,out])
+            #elapsed = (time.time_ns()-start_t)/(10**9)
+            #print(elapsed)
+            plt.scatter(outs[:,0],outs[:,1])
+            plt.title('hidden {} latent {} projected'.format(h,l))
+            plt.savefig(os.path.join(os.getcwd(),'temp','h{}l{}p.png'.format(h,l)))
+            plt.close()
+            #plt.show()
+            test=True
