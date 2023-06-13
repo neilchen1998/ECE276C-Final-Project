@@ -8,8 +8,8 @@ import os
 from matplotlib import pyplot as plt
 import time
 
-HIDDEN = 10
-LATENT = 6
+HIDDEN = 14
+LATENT = 10
 
 class Generator(ABC):
     """
@@ -172,7 +172,7 @@ class VAE_Generator(Generator):
                 print('batch ',i+1,' of ',num_batches,' in epoch ',epoch)
                 print('training loss: ',loss.item())
         print('done training')
-        #torch.save({'model_state_dict':self.model.state_dict()},os.path.join(os.getcwd(),'pretrained.tar'))
+        torch.save({'model_state_dict':self.model.state_dict()},os.path.join(os.getcwd(),'pretrained.tar'))
     
 if __name__ == '__main__':
     '''data = np.zeros((1,2))
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     print(data2)'''
 
     dataset = np.zeros((2,))
-    root = os.path.join(os.getcwd(),'exports')
+    root = os.path.join(os.getcwd(),'samples')
     files = os.listdir(root)
     for f in files:
         if 'samples' not in f:
@@ -207,26 +207,47 @@ if __name__ == '__main__':
         dataset = np.vstack([dataset,data])
     dataset = dataset[1:,:]
     np.save('dataset.npy',dataset)
-    for h in range(1,15):
-        for l in range(1,15):
+    '''for h in range(2,15,2):
+        for l in range(2,h+1,2):
             print('h{}l{}'.format(h,l))
             HIDDEN=h
             LATENT=l
             vae = VAE_Generator()
             gen = Baseline_Generator()
             outs = np.zeros((2,))
-            #start_t = time.time_ns()
+            start_t = time.time_ns()
             for i in range(1800):
                 if i%100==0:
                     print(i)
                 out = vae.generate(np.random.normal(0,1,(LATENT,)))
                 #out = gen.generate(np.random.normal(0,1,(2,)))
                 outs = np.vstack([outs,out])
-            #elapsed = (time.time_ns()-start_t)/(10**9)
+            elapsed = (time.time_ns()-start_t)/(10**9)
             #print(elapsed)
             plt.scatter(outs[:,0],outs[:,1])
-            plt.title('hidden {} latent {} projected'.format(h,l))
+            plt.title('hidden {} latent {} projected, time={}'.format(h,l,elapsed))
+            plt.xlim(-3.5,3.5)
+            plt.ylim(-3.5,3.5)
             plt.savefig(os.path.join(os.getcwd(),'temp','h{}l{}p.png'.format(h,l)))
             plt.close()
-            #plt.show()
-            test=True
+            #plt.show()'''
+    
+    vae = VAE_Generator()
+    start_t = time.time_ns()
+    
+    
+    outs = np.zeros((2,))
+    for i in range(1800):
+        if i%100==0:
+            print(i)
+        out = vae.generate(np.random.normal(0,1,(LATENT,)))
+        #out = gen.generate(np.random.normal(0,1,(2,)))
+        outs = np.vstack([outs,out])
+    elapsed = (time.time_ns()-start_t)/(10**9)
+    print(elapsed)
+    plt.scatter(outs[:,0],outs[:,1])
+    plt.title('hidden {} latent {} projected, time={}'.format(HIDDEN,LATENT,elapsed))
+    plt.xlim(-3.5,3.5)
+    plt.ylim(-3.5,3.5)
+    plt.show()
+    test=True
