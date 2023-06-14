@@ -6,6 +6,7 @@ import sys
 from math import sqrt
 import argparse
 import numpy as np
+import time
 
 try:
     from ompl import util as ou
@@ -46,7 +47,6 @@ def allocateObjective(si, objectiveType):
     else:
         ou.OMPL_ERROR("Optimization-objective is not implemented in allocation function.")
 
-
 def allocatePlanner(si, plannerType):
 
     """Select the desired planner type
@@ -64,6 +64,8 @@ def allocatePlanner(si, plannerType):
         return og.FMT(si)
     elif plannerType.lower() == "informedrrtstar":
         return og.InformedRRTstar(si)
+    elif plannerType.lower() == "prm":
+        return og.PRM(si)
     elif plannerType.lower() == "prmstar":
         return og.PRMstar(si)
     elif plannerType.lower() == "rrtstar":
@@ -75,7 +77,19 @@ def allocatePlanner(si, plannerType):
     else:
         ou.OMPL_ERROR("Planner-type is not implemented in allocation function.")
 
-def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), plannerRange: float = 0.1, fname: str ='export'):
+
+def allocMyValidStateSampler(si):
+
+    """Returns an instance of my sampler
+
+    Keyword arguments:
+    si -- the system info
+    """
+
+    return MyBaselineStateSampler(si)
+
+  
+def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), fname: str ='export'):
 
     """Plan the path using the specific type of planner
 
@@ -88,13 +102,11 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     fname -- the name of the output file
     """
 
-    assert(runTime > 0.0, 'the value of runtime should be greater than 0.0')
-
     # construct the state space of the robot
     space = ob.RealVectorStateSpace(2)
 
-    # set the bound of the space to be in [0, 1]
-    space.setBounds(0.0, 1.0)
+    # set the bound of the space to be in [-np.pi, np.pi]
+    space.setBounds(-np.pi, np.pi)
 
     # set the state sampler allocator
     space.setStateSamplerAllocator(ob.StateSamplerAllocator(MyStateSampler))
@@ -107,6 +119,9 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     si.setStateValidityChecker(validityChecker)
 
     si.setup()
+
+    # export the planner data
+    planner_data = ob.PlannerData(si)
 
     # set the starting point of the robot to be the bottom-left
     start = ob.State(space)
@@ -132,12 +147,58 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     optimizingPlanner.setProblemDefinition(pdef)
     optimizingPlanner.setup()
 
-    # set the range that the planner suppose to use
-    optimizingPlanner.setRange(plannerRange)
+    # set up a custom filter that filter out nodes that are too far away from each other
+    def myFilter(a, b) -> bool:
 
-    # attempt to solve the problem within the given runtime
-    solved = optimizingPlanner.solve(runTime)
+        '''Rejects connections if the distance between two node are larger than a threshold
 
+        Keyword arguments:
+        a -- vertex a
+        b -- vertex b
+        '''
+
+        # update the planner
+        optimizingPlanner.getPlannerData(planner_data)
+
+        # check the distance between two nodes
+        if (optimizingPlanner.distanceFunction(a, b) > np.pi/8):
+            return False
+        else:
+            return True
+
+    optimizingPlanner.setConnectionFilter(og.ConnectionFilter(myFilter))
+
+    # attempt to solve the problem within the number of iterations
+
+    myRunTimeCondition = ob.timedPlannerTerminationCondition(runTime)
+
+    # define the maximum number of vertices that PRM can generate
+    NUM_VERTICES_THRESHOLD = 1500
+
+    # a function that terminate the planner once it exceeds the number of vertices
+    def check_cnt():
+
+        # update the planner data
+        optimizingPlanner.getPlannerData(planner_data)
+
+        # get the number of samples (vertices)
+        numSamples = planner_data.numVertices()
+        
+        # returns true if we 
+        if (numSamples > NUM_VERTICES_THRESHOLD):
+            return True
+        else:
+            return False
+
+    myItrCondition = ob.PlannerTerminationConditionFn(check_cnt)
+
+    # combine two conditions into one big condition
+    myConditions = ob.plannerOrTerminationCondition(myRunTimeCondition, myItrCondition)
+
+    # solve the problem
+    solved = optimizingPlanner.solve(myConditions)
+
+    # check if a solution has been found
     if solved:
          
         # Output the solution info
@@ -161,15 +222,34 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
             # export the solution path
             with open('{}.txt'.format(fname), 'w+') as outFile:
                 outFile.write(pdef.getSolutionPath().printAsMatrix())
-    
+
+        # update the planner data
+        optimizingPlanner.getPlannerData(planner_data)
+
+        # get the number of samples (vertices)
+        numSamples = planner_data.numVertices()
+
+        # export all samples to an numpy array
+        export = np.zeros((numSamples, 2))
+        for i in range(planner_data.numVertices()):
+            export[i, 0] = planner_data.getVertex(i).getState()[0]
+            export[i, 1] = planner_data.getVertex(i).getState()[1]
+
+        np.save('{}-samples.npy'.format(fname), export)
+
     else:
         print("No solution found.")
 
 if __name__ == "__main__":
 
-    runTime = 30
-    planner = 'RRT'
+    runTime = 60
+    planner = 'PRM'
     objective = 'PathLength'
-    s, g = (0.0, 0.0), (1.0, 1.0)
+    s, g = (np.pi/4, 0.0), (0.75*np.pi, -np.pi/2)
+    fname = 'path-PRM'
 
-    plan(runTime, planner, objective, s, g, fname='path')
+    start = time.time_ns()
+    plan(runTime, planner, objective, s, g, fname=fname)
+    end = time.time_ns()
+    elapse = (end - start) / 10**9
+    print("time elapsed: {:.3}".format(elapse))

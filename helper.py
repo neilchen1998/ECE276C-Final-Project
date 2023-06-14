@@ -4,6 +4,16 @@ from ompl import base as ob
 from ompl import util as ou
 from math import sqrt
 import sys
+import numpy as np
+from generator import *
+import spatialmath as smb
+from spatialgeometry import Cuboid
+from two_link import *
+
+two_link = TwoLink()
+obstacles = []
+obstacles.append(Cuboid(scale=[2, 1, 1],\
+                pose=smb.SE3(0, 18, 0), collision = True))
 
 # source https://ompl.kavrakilab.org/StateSampling_8py_source.html
 
@@ -11,7 +21,7 @@ class ValidityChecker(ob.StateValidityChecker):
 
     def clearance(self, state) -> float:
 
-        """Returns the distance from the position of the given state to the boundary of the circle
+        """Returns whetheer the robot is in the clear or not
 
         Keyword arguments:
         state -- the given state
@@ -21,18 +31,51 @@ class ValidityChecker(ob.StateValidityChecker):
         x = state[0]
         y = state[1]
 
-        return sqrt((x-0.5)*(x-0.5) + (y-0.5)*(y-0.5)) - 0.25
-    
-    def isValid(self, state) -> bool:
+        # check all obstacles
+        for obs in obstacles:
 
-        """Returns whether the position of the given state overlaps the circular obstacle
+            if (two_link.iscollided([x, y], obs)):
+                return False
+
+        return True
+    
+    def isUpright(self, state) -> bool:
+
+        """Returns whether the cup is upright
 
         Keyword arguments:
         state -- the given state
         """
 
-        return self.clearance(state) > 0.0
+        # extract the values of x & y
+        x = state[0]
+        y = state[1]
+
+        robot = rtb.models.DH.Planar2()
+
+        # calculate the difference of the angles
+        def constr2(X):
+            rot = X.angvec()
+            if (np.isnan(rot[0])):
+                    return 0.0
+            ang = (np.pi/2) -rot[0]*np.sign(np.sum(rot[1]))
+            ang = abs(ang)
+            ang_diff = (np.pi/4)-ang
+            return ang_diff
+
+        return constr2(robot.fkine([x,y])) >= 0
     
+    def isValid(self, state) -> bool:
+
+        """Returns whether the state is valid or not
+        The state must not be too close to the obstacles
+        and the cup must be upright 
+
+        Keyword arguments:
+        state -- the given state
+        """
+        
+        return self.clearance(state) and self.isUpright(state)   
 
 class ClearanceObjective(ob.StateCostIntegralObjective):
 
@@ -90,30 +133,33 @@ def getThresholdPathLengthObj(si):
     
     return obj
 
-class MyStateSampler(ob.StateSampler):
+
+class MyBaselineStateSampler(ob.ValidStateSampler):
 
     def __init__(self, si):
-        super(MyStateSampler, self).__init__(si)
-        self.name_ = "my sampler"
+        super(MyBaselineStateSampler, self).__init__(si)
+        self.name_ = "my baseline sampler"
         self.rng_ = ou.RNG()
+        self.gen_ = Baseline_Generator()
 
-    def sampleUniform(self, state):
 
-        """Override the sample uniform function such that it does not returns points in the top-left quardrant
-        A valid states must follow the following constraints:
-        0 <= x,y <=1
-        if x <= 0.5, then y < 0.5
+    def sample(self, state):
+    
+        """Returns a sample in the valid part of the R^2 state space using 
+        the custom generator
+
 
         Keyword arguments:
         state -- the state of the robot
         """
-        
-        x = self.rng_.uniformReal(0, 1)
-        if x <= 0.5:
-            y = self.rng_.uniformReal(0, 0.5)
-        else:
-            y = self.rng_.uniformReal(0, 1)
-        
+
+
+        # CAUTION: the points generated from the generator may be illegal
+        vec = self.gen_.generate(np.array([self.rng_.gaussian01(), self.rng_.gaussian01()]))
+
         # assign the value we generate to state
-        state[0] = x
-        state[1] = y
+        state[0] = vec[0]
+        state[1] = vec[1]
+
+        return True
+
