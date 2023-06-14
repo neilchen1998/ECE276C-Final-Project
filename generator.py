@@ -36,6 +36,8 @@ class Baseline_Generator(Generator):
         self.robot = rtb.models.DH.Planar2()
         def constr2(X):
             rot = X.angvec()
+            if (np.isnan(rot[0])):
+                return 0
             ang = (np.pi/2) -rot[0]*np.sign(np.sum(rot[1]))
             ang = abs(ang)
             ang_diff = (np.pi/4)-ang
