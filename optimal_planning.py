@@ -6,6 +6,7 @@ import sys
 from math import sqrt
 import argparse
 import numpy as np
+import time
 
 try:
     from ompl import util as ou
@@ -165,8 +166,35 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 
     optimizingPlanner.setConnectionFilter(og.ConnectionFilter(myFilter))
 
-    # attempt to solve the problem within the given runtime
-    solved = optimizingPlanner.solve(runTime)
+    # attempt to solve the problem within the number of iterations
+
+    myRunTimeCondition = ob.timedPlannerTerminationCondition(runTime)
+
+    # define the maximum number of vertices that PRM can generate
+    NUM_VERTICES_THRESHOLD = 1500
+
+    # a function that terminate the planner once it exceeds the number of vertices
+    def check_cnt():
+
+        # update the planner data
+        optimizingPlanner.getPlannerData(planner_data)
+
+        # get the number of samples (vertices)
+        numSamples = planner_data.numVertices()
+        
+        # returns true if we 
+        if (numSamples > NUM_VERTICES_THRESHOLD):
+            return True
+        else:
+            return False
+
+    myItrCondition = ob.PlannerTerminationConditionFn(check_cnt)
+
+    # combine two conditions into one big condition
+    myConditions = ob.plannerOrTerminationCondition(myRunTimeCondition, myItrCondition)
+
+    # solve the problem
+    solved = optimizingPlanner.solve(myConditions)
 
     # check if a solution has been found
     if solved:
@@ -218,4 +246,8 @@ if __name__ == "__main__":
     s, g = (np.pi/4, 0.0), (0.75*np.pi, -np.pi/2)
     fname = 'path-PRM'
 
+    start = time.time_ns()
     plan(runTime, planner, objective, s, g, fname=fname)
+    end = time.time_ns()
+    elapse = (end - start) / 10**9
+    print("time elapsed: {:.3}".format(elapse))
