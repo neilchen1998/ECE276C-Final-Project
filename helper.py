@@ -133,6 +133,7 @@ def getThresholdPathLengthObj(si):
     
     return obj
 
+
 class MyBaselineStateSampler(ob.ValidStateSampler):
 
     def __init__(self, si):
@@ -141,14 +142,17 @@ class MyBaselineStateSampler(ob.ValidStateSampler):
         self.rng_ = ou.RNG()
         self.gen_ = Baseline_Generator()
 
+
     def sample(self, state):
     
         """Returns a sample in the valid part of the R^2 state space using 
         the custom generator
 
+
         Keyword arguments:
         state -- the state of the robot
         """
+
 
         # CAUTION: the points generated from the generator may be illegal
         vec = self.gen_.generate(np.array([self.rng_.gaussian01(), self.rng_.gaussian01()]))
@@ -158,3 +162,4 @@ class MyBaselineStateSampler(ob.ValidStateSampler):
         state[1] = vec[1]
 
         return True
+

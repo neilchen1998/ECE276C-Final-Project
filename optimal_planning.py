@@ -77,6 +77,7 @@ def allocatePlanner(si, plannerType):
     else:
         ou.OMPL_ERROR("Planner-type is not implemented in allocation function.")
 
+
 def allocMyValidStateSampler(si):
 
     """Returns an instance of my sampler
@@ -87,6 +88,7 @@ def allocMyValidStateSampler(si):
 
     return MyBaselineStateSampler(si)
 
+  
 def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), fname: str ='export'):
 
     """Plan the path using the specific type of planner
@@ -106,15 +108,15 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     # set the bound of the space to be in [-np.pi, np.pi]
     space.setBounds(-np.pi, np.pi)
 
+    # set the state sampler allocator
+    space.setStateSamplerAllocator(ob.StateSamplerAllocator(MyStateSampler))
+
     # construct a state information instance
     si = ob.SpaceInformation(space)
 
     # set the checker to check which states are valid
     validityChecker = ValidityChecker(si)
     si.setStateValidityChecker(validityChecker)
-
-    # set the sampler
-    si.setValidStateSamplerAllocator(ob.ValidStateSamplerAllocator(allocMyValidStateSampler))
 
     si.setup()
 

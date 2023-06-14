@@ -1,0 +1,25 @@
+generate a bunch of random gaussian points and project to constraint
+pretrain network on dataset
+run rrt and store all generated points
+add points to dataset
+retrain network on dataset
+repeat from line 3
+
+
+
+network[
+    encoder[]
+    decoder[]
+    dataset[]
+
+    generate(noise)
+    train()
+    export_data()
+]
+
+todo:
+write generator for baseline (use same api as VAE) -- max
+write VAE file (start with api) -- max
+write collision checking in validity checker function -- neil
+write code to call network when sampling -- neil
+figure out pybullet visuals -- later
