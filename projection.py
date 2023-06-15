@@ -18,14 +18,14 @@ def project_to_constraint(q_in, constraint_grad, lims, robot):
 	qtemp = q_in
 	for i in range(max_iter):
 		J = robot.jacob0(qtemp)
-		x = robot.fkine(np.reshape(qtemp, (2,)))
+		x = robot.fkine(np.reshape(qtemp, (7,)))
 		grad = constraint_grad(x)
-		step = step_size * np.reshape(grad @ J, (2, 1))
+		step = step_size * np.reshape(grad @ J, (7, 1))
 		qnext = qtemp - step
 		qtemp = qnext
 		if np.linalg.norm(step) < 0.0001:
 			break
-	qtemp = np.reshape(qtemp, (2,))
+	qtemp = np.reshape(qtemp, (7,))
 	return qtemp
 
 def project_to_constraint_scipy(q_in, constraints,consttypes, lims, robot):
@@ -43,9 +43,9 @@ def project_to_constraint_scipy(q_in, constraints,consttypes, lims, robot):
 	for i in range(len(constraints)):
 		c = constraints[i]
 		t = consttypes[i]
-		item = {'type':t,'fun':(lambda q: c(robot.fkine(np.reshape(q,(2,)))))}
+		item = {'type':t,'fun':(lambda q: c(robot.fkine(np.reshape(q,(7,)))))}
 		consts.append(item)
-	qout = opti.minimize(loss,np.reshape(q_in,(2,)),method='slsqp',bounds=lims,constraints=consts,options={'disp':False, 'ftol':1e-6, 'maxiter':2000})
+	qout = opti.minimize(loss,np.reshape(q_in,(7,)),method='slsqp',bounds=lims,constraints=consts,options={'disp':False, 'ftol':1e-6, 'maxiter':2000})
 	return qout.x
 
 

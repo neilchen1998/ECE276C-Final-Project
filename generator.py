@@ -37,11 +37,12 @@ class Baseline_Generator(Generator):
     def __init__(self):
         self.robot = rtb.models.URDF.Panda()
         def constr2(X):
-            ang_diff = -np.arccos(X.R[2,2])+np.pi/4
+            ang_diff = -np.arccos(X.R[2,2])+np.pi/10
             return ang_diff
         self.constraints = [constr2]
         self.constr_types = ['ineq']
-        self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi)]
+        self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi), (-np.pi, np.pi), \
+                       (-np.pi, np.pi), (-np.pi, np.pi), (-np.pi, np.pi), (-np.pi, np.pi)]
         #self.dataset = np.load('dataset.npy')
         #self.raw = np.load('unprojected.npy')
     
@@ -121,11 +122,12 @@ class VAE_Generator(Generator):
     def __init__(self):
         self.robot = rtb.models.URDF.Panda()
         def constr2(X):
-            ang_diff = -np.arccos(X.R[2,2])+np.pi/4
+            ang_diff = -np.arccos(X.R[2,2])+np.pi/10
             return ang_diff
         self.constraints = [constr2]
         self.constr_types = ['ineq']
-        self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi)]
+        self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi), (-np.pi, np.pi), \
+                       (-np.pi, np.pi), (-np.pi, np.pi), (-np.pi, np.pi), (-np.pi, np.pi)]
         self.model = VAE_model(num_joints=7,hidden_size=HIDDEN,latent_size=LATENT)
         files = os.listdir(os.getcwd())
         pretrained_file = 'pretrained.tar'
@@ -237,22 +239,26 @@ if __name__ == '__main__':
             #plt.show()'''
     
     start_t = time.time_ns()
-    vae = VAE_Generator()
-    # gen = Baseline_Generator()
+    # vae = VAE_Generator()
+    gen = Baseline_Generator()
     
     
-    outs = np.zeros((2,))
+    outs = np.zeros((7,))
     for i in range(1500):
         if i%100==0:
             print(i)
-        out = vae.generate(np.random.normal(0,1))
-        #out = gen.generate(np.random.normal(0,1,(2,)))
+        # out = vae.generate(np.random.normal(0,1))
+        out = gen.generate(np.random.normal(0,1,(7,)))
         outs = np.vstack([outs,out])
     elapsed = (time.time_ns()-start_t)/(10**9)
     print(elapsed)
-    plt.scatter(outs[:,0],outs[:,1])
-    plt.title('hidden {} latent {} projected, time={}'.format(HIDDEN,LATENT,elapsed))
-    plt.xlim(-3.5,3.5)
-    plt.ylim(-3.5,3.5)
+    print(outs[-1])
+    robot = rtb.models.URDF.Panda()
+    robot.plot(outs[-1], 'pyplot')
     plt.show()
+    # plt.scatter(outs[:,0],outs[:,1])
+    # plt.title('hidden {} latent {} projected, time={}'.format(HIDDEN,LATENT,elapsed))
+    # plt.xlim(-3.5,3.5)
+    # plt.ylim(-3.5,3.5)
+    # plt.show()
     test=True

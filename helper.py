@@ -14,8 +14,8 @@ import roboticstoolbox as rtb
 # robot = TwoLink()
 robot = rtb.models.URDF.Panda()
 obstacles = []
-obstacles.append(Cuboid(scale=[2, 1, 1],\
-                pose=smb.SE3(0, 18, 0), collision = True))
+# obstacles.append(Cuboid(scale=[2, 1, 1],\
+#                 pose=smb.SE3(0, 18, 0), collision = True))
 
 # source https://ompl.kavrakilab.org/StateSampling_8py_source.html
 
@@ -49,11 +49,12 @@ class ValidityChecker(ob.StateValidityChecker):
 
         # calculate the difference of the angles
         def constr2(X):
-            ang_diff = -np.arccos(X.R[2,2])+np.pi/4
+            ang_diff = -np.arccos(X.R[2,2])+np.pi/10
             return ang_diff
-
-        return constr2(robot.fkine([state[0], state[1], state[2], \
-                                  state[3], state[4], state[5], state[6]])) >= 0
+        tmp = robot.fkine([state[0], state[1], state[2], \
+                                  state[3], state[4], state[5], state[6]])
+        ret = constr2(tmp)
+        return ret >= 0
     
     def isValid(self, state) -> bool:
 

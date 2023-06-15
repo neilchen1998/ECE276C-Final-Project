@@ -126,13 +126,24 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 
     # set the starting point of the robot to be the bottom-left
     start = ob.State(space)
+
     start[0] = s[0]
     start[1] = s[1]
+    start[2] = s[2]
+    start[3] = s[3]
+    start[4] = s[4]
+    start[5] = s[5]
+    start[6] = s[6]
 
     # set the ending point of the robot to be the top-right
     goal = ob.State(space)
     goal[0] = g[0]
     goal[1] = g[1]
+    goal[2] = g[2]
+    goal[3] = g[3]
+    goal[4] = g[4]
+    goal[5] = g[5]
+    goal[6] = g[6]
 
     # create a problem instance
     pdef = ob.ProblemDefinition(si)
@@ -162,7 +173,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
         optimizingPlanner.getPlannerData(planner_data)
 
         # check the distance between two nodes
-        if (optimizingPlanner.distanceFunction(a, b) > np.pi/8):
+        if (optimizingPlanner.distanceFunction(a, b) > np.pi/2):
             return False
         else:
             return True
@@ -174,7 +185,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     myRunTimeCondition = ob.timedPlannerTerminationCondition(runTime)
 
     # define the maximum number of vertices that PRM can generate
-    NUM_VERTICES_THRESHOLD = 1500
+    NUM_VERTICES_THRESHOLD = 3000
 
     # a function that terminate the planner once it exceeds the number of vertices
     def check_cnt():
@@ -247,11 +258,21 @@ if __name__ == "__main__":
     runTime = 60
     planner = 'PRM'
     objective = 'PathLength'
-    s, g = (np.pi/4, 0.0), (0.75*np.pi, -np.pi/2)
-    fname = 'path-PRM'
+    s, g = (1.44426457,  0.75387713, -0.93784086, -1.39904889, -2.53033945,  1.29290135, 0.31331037), \
+        (-0.08821695, -1.7245521,   1.01002702, -1.34592485, -1.2625115,   2.06937916, -1.04548166)
+    # fname = 'path-PRM'
 
-    start = time.time_ns()
-    plan(runTime, planner, objective, s, g, fname=fname)
-    end = time.time_ns()
-    elapse = (end - start) / 10**9
-    print("time elapsed: {:.5}".format(elapse))
+    # start = time.time_ns()
+    # plan(runTime, planner, objective, s, g, fname=fname)
+    # end = time.time_ns()
+    # elapse = (end - start) / 10**9
+    # print("time elapsed: {:.5}".format(elapse))
+
+    for i in range(8):
+
+        fname = 'path-PRM-{}'.format(i)
+        start = time.time_ns()
+        plan(runTime, planner, objective, s, g, fname=fname)
+        end = time.time_ns()
+        elapse = (end - start) / 10**9
+        print("time elapsed: {:.5}".format(elapse))
