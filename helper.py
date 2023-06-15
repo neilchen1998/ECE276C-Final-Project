@@ -49,12 +49,7 @@ class ValidityChecker(ob.StateValidityChecker):
 
         # calculate the difference of the angles
         def constr2(X):
-            rot = X.angvec()
-            if (np.isnan(rot[0])):
-                    return 0.0
-            ang = (np.pi/2) -rot[0]*np.sign(np.sum(rot[1]))
-            ang = abs(ang)
-            ang_diff = (np.pi/4)-ang
+            ang_diff = -np.arccos(X.R[2,2])+np.pi/4
             return ang_diff
 
         return constr2(robot.fkine([state[0], state[1], state[2], \
