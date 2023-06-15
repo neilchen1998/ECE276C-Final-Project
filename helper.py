@@ -169,6 +169,7 @@ class MyVAEStateSampler(ob.ValidStateSampler):
         self.name_ = "my VAE sampler"
         self.rng_ = ou.RNG()
         self.gen_ = VAE_Generator()
+        self.idx_ = np.random.randint(0, 1600)
 
     def sample(self, state):
     
@@ -181,11 +182,15 @@ class MyVAEStateSampler(ob.ValidStateSampler):
 
         # CAUTION: the points generated from the generator may be illegal
         # pick any sample from the set that previously generated
-        vec = self.gen_.generate(np.random.randint(0, 1500))
+        vec = self.gen_.generate(self.idx_)
 
         # assign the value we generate to state
         state[0] = vec[0]
         state[1] = vec[1]
+
+        # increase the index
+        self.idx_ += 1
+        self.idx_ %= 1500
 
         return True
     
