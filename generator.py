@@ -54,8 +54,8 @@ class Baseline_Generator(Generator):
         '''
         takes in a random seed as np.array of shape (2,) and returns a sample
         '''
-        if self.constraints[0](self.robot.fkine(seed))>=0:
-            return seed
+        # if self.constraints[0](self.robot.fkine(seed))>=0:
+        #     return seed
         sample = project(seed,self.constraints,self.constr_types,self.j_lims,self.robot)
         #dataset = np.load('dataset.npy')
         #dataset = np.vstack([dataset,sample])
