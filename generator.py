@@ -7,6 +7,8 @@ import roboticstoolbox as rtb
 import os
 from matplotlib import pyplot as plt
 import time
+from two_link import *
+
 
 HIDDEN = 14
 LATENT = 10
@@ -33,7 +35,7 @@ class Baseline_Generator(Generator):
     Generator which just projects samples to constrained space
     """
     def __init__(self):
-        self.robot = rtb.models.DH.Planar2()
+        self.robot = TwoLink()
         def constr2(X):
             rot = X.angvec()
             if (np.isnan(rot[0])):
@@ -52,6 +54,8 @@ class Baseline_Generator(Generator):
         '''
         takes in a random seed as np.array of shape (2,) and returns a sample
         '''
+        if self.constraints[0](self.robot.fkine(seed))>=0:
+            return seed
         sample = project(seed,self.constraints,self.constr_types,self.j_lims,self.robot)
         #dataset = np.load('dataset.npy')
         #dataset = np.vstack([dataset,sample])
@@ -112,7 +116,7 @@ class VAE_model(torch.nn.Module):
     
     def generate(self,z):
         with torch.no_grad():
-            out = self.decoder(torch.from_numpy(z).float()).detach().numpy()
+            out = self.decoder(torch.from_numpy(z).float()).detach().numpy().astype(np.float64)
         return out
 
 class VAE_Generator(Generator):
@@ -120,9 +124,11 @@ class VAE_Generator(Generator):
     Generator which uses VAE to generate samples on the constraint
     """
     def __init__(self):
-        self.robot = rtb.models.DH.Planar2()
+        self.robot = TwoLink()
         def constr2(X):
             rot = X.angvec()
+            if (np.isnan(rot[0])):
+                    return 0.0
             ang = (np.pi/2) -rot[0]*np.sign(np.sum(rot[1]))
             ang = abs(ang)
             ang_diff = (np.pi/4)-ang
@@ -139,8 +145,14 @@ class VAE_Generator(Generator):
         else:
             self.dataset = np.load('dataset.npy')
             self.train(400,4096)
+        self.samples = self.model.generate(np.random.normal(0,3,(1500,LATENT)))
     def generate(self,seed):
-        sample = self.model.generate(seed)
+        #sample = self.model.generate(seed)
+        
+        sample = self.samples[np.random.randint(0, 1500),:]
+
+        if self.constraints[0](self.robot.fkine(sample))>=0:
+            return sample
         projected = project(sample,self.constraints,self.constr_types,self.j_lims,self.robot)
         #projected = sample
         #dataset = np.load('dataset.npy')
@@ -234,15 +246,16 @@ if __name__ == '__main__':
             plt.close()
             #plt.show()'''
     
-    vae = VAE_Generator()
     start_t = time.time_ns()
+    vae = VAE_Generator()
+    # gen = Baseline_Generator()
     
     
     outs = np.zeros((2,))
-    for i in range(1800):
+    for i in range(1500):
         if i%100==0:
             print(i)
-        out = vae.generate(np.random.normal(0,1,(LATENT,)))
+        out = vae.generate(np.random.normal(0,1))
         #out = gen.generate(np.random.normal(0,1,(2,)))
         outs = np.vstack([outs,out])
     elapsed = (time.time_ns()-start_t)/(10**9)

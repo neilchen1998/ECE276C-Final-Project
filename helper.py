@@ -10,7 +10,7 @@ import spatialmath as smb
 from spatialgeometry import Cuboid
 from two_link import *
 
-two_link = TwoLink()
+robot = TwoLink()
 obstacles = []
 obstacles.append(Cuboid(scale=[2, 1, 1],\
                 pose=smb.SE3(0, 18, 0), collision = True))
@@ -34,7 +34,8 @@ class ValidityChecker(ob.StateValidityChecker):
         # check all obstacles
         for obs in obstacles:
 
-            if (two_link.iscollided([x, y], obs)):
+            if (robot.iscollided([x, y], obs)):
+                
                 return False
 
         return True
@@ -50,8 +51,6 @@ class ValidityChecker(ob.StateValidityChecker):
         # extract the values of x & y
         x = state[0]
         y = state[1]
-
-        robot = rtb.models.DH.Planar2()
 
         # calculate the difference of the angles
         def constr2(X):
@@ -163,3 +162,30 @@ class MyBaselineStateSampler(ob.ValidStateSampler):
 
         return True
 
+class MyVAEStateSampler(ob.ValidStateSampler):
+
+    def __init__(self, si):
+        super(MyVAEStateSampler, self).__init__(si)
+        self.name_ = "my VAE sampler"
+        self.rng_ = ou.RNG()
+        self.gen_ = VAE_Generator()
+
+    def sample(self, state):
+    
+        """Returns a sample in the valid part of the R^2 state space using 
+        the custom generator
+
+        Keyword arguments:
+        state -- the state of the robot
+        """
+
+        # CAUTION: the points generated from the generator may be illegal
+        # pick any sample from the set that previously generated
+        vec = self.gen_.generate(np.random.randint(0, 1500))
+
+        # assign the value we generate to state
+        state[0] = vec[0]
+        state[1] = vec[1]
+
+        return True
+    

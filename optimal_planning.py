@@ -87,6 +87,7 @@ def allocMyValidStateSampler(si):
     """
 
     return MyBaselineStateSampler(si)
+    # return MyVAEStateSampler(si)
 
   
 def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), fname: str ='export'):
@@ -196,7 +197,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     myConditions = ob.plannerOrTerminationCondition(myRunTimeCondition, myItrCondition)
 
     # solve the problem
-    solved = optimizingPlanner.solve(myConditions)
+    solved = optimizingPlanner.solve(myItrCondition)
 
     # check if a solution has been found
     if solved:
@@ -252,4 +253,4 @@ if __name__ == "__main__":
     plan(runTime, planner, objective, s, g, fname=fname)
     end = time.time_ns()
     elapse = (end - start) / 10**9
-    print("time elapsed: {:.3}".format(elapse))
+    print("time elapsed: {:.5}".format(elapse))
