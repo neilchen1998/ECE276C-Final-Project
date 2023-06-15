@@ -185,7 +185,8 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
         # get the number of samples (vertices)
         numSamples = planner_data.numVertices()
         
-        # returns true if we 
+        # returns true if the number of vertices is greater than the threshold
+        # the planner will terminate then
         if (numSamples > NUM_VERTICES_THRESHOLD):
             return True
         else:
