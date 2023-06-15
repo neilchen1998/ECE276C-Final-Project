@@ -104,7 +104,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     """
 
     # construct the state space of the robot
-    space = ob.RealVectorStateSpace(2)
+    space = ob.RealVectorStateSpace(7)
 
     # set the bound of the space to be in [-np.pi, np.pi]
     space.setBounds(-np.pi, np.pi)

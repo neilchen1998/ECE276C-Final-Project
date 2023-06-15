@@ -37,12 +37,7 @@ class Baseline_Generator(Generator):
     def __init__(self):
         self.robot = TwoLink()
         def constr2(X):
-            rot = X.angvec()
-            if (np.isnan(rot[0])):
-                return 0
-            ang = (np.pi/2) -rot[0]*np.sign(np.sum(rot[1]))
-            ang = abs(ang)
-            ang_diff = (np.pi/4)-ang
+            ang_diff = -np.arccos(X.R[2,2])+np.pi/4
             return ang_diff
         self.constraints = [constr2]
         self.constr_types = ['ineq']
@@ -126,17 +121,12 @@ class VAE_Generator(Generator):
     def __init__(self):
         self.robot = TwoLink()
         def constr2(X):
-            rot = X.angvec()
-            if (np.isnan(rot[0])):
-                    return 0.0
-            ang = (np.pi/2) -rot[0]*np.sign(np.sum(rot[1]))
-            ang = abs(ang)
-            ang_diff = (np.pi/4)-ang
+            ang_diff = -np.arccos(X.R[2,2])+np.pi/4
             return ang_diff
         self.constraints = [constr2]
         self.constr_types = ['ineq']
         self.j_lims = [(-np.pi, np.pi), (-np.pi, np.pi)]
-        self.model = VAE_model(num_joints=2,hidden_size=HIDDEN,latent_size=LATENT)
+        self.model = VAE_model(num_joints=7,hidden_size=HIDDEN,latent_size=LATENT)
         files = os.listdir(os.getcwd())
         pretrained_file = 'pretrained.tar'
         if pretrained_file in files:
