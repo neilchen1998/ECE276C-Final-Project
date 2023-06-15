@@ -7,7 +7,7 @@ import roboticstoolbox as rtb
 import os
 from matplotlib import pyplot as plt
 import time
-from two_link import *
+# from two_link import *
 
 
 HIDDEN = 14
@@ -35,7 +35,7 @@ class Baseline_Generator(Generator):
     Generator which just projects samples to constrained space
     """
     def __init__(self):
-        self.robot = TwoLink()
+        self.robot = rtb.models.URDF.Panda()
         def constr2(X):
             rot = X.angvec()
             if (np.isnan(rot[0])):
@@ -124,7 +124,7 @@ class VAE_Generator(Generator):
     Generator which uses VAE to generate samples on the constraint
     """
     def __init__(self):
-        self.robot = TwoLink()
+        self.robot = rtb.models.URDF.Panda()
         def constr2(X):
             rot = X.angvec()
             if (np.isnan(rot[0])):

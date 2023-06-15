@@ -8,9 +8,11 @@ import numpy as np
 from generator import *
 import spatialmath as smb
 from spatialgeometry import Cuboid
-from two_link import *
+# from two_link import *
+import roboticstoolbox as rtb
 
-robot = TwoLink()
+# robot = TwoLink()
+robot = rtb.models.URDF.Panda()
 obstacles = []
 obstacles.append(Cuboid(scale=[2, 1, 1],\
                 pose=smb.SE3(0, 18, 0), collision = True))
@@ -27,14 +29,11 @@ class ValidityChecker(ob.StateValidityChecker):
         state -- the given state
         """
 
-        # extract the values of x & y
-        x = state[0]
-        y = state[1]
-
         # check all obstacles
         for obs in obstacles:
 
-            if (robot.iscollided([x, y], obs)):
+            if (robot.iscollided([state[0], state[1], state[2], \
+                                  state[3], state[4], state[5], state[6]], obs)):
                 
                 return False
 
@@ -48,10 +47,6 @@ class ValidityChecker(ob.StateValidityChecker):
         state -- the given state
         """
 
-        # extract the values of x & y
-        x = state[0]
-        y = state[1]
-
         # calculate the difference of the angles
         def constr2(X):
             rot = X.angvec()
@@ -62,7 +57,8 @@ class ValidityChecker(ob.StateValidityChecker):
             ang_diff = (np.pi/4)-ang
             return ang_diff
 
-        return constr2(robot.fkine([x,y])) >= 0
+        return constr2(robot.fkine([state[0], state[1], state[2], \
+                                  state[3], state[4], state[5], state[6]])) >= 0
     
     def isValid(self, state) -> bool:
 
@@ -152,13 +148,18 @@ class MyBaselineStateSampler(ob.ValidStateSampler):
         state -- the state of the robot
         """
 
-
         # CAUTION: the points generated from the generator may be illegal
-        vec = self.gen_.generate(np.array([self.rng_.gaussian01(), self.rng_.gaussian01()]))
+        vec = self.gen_.generate(np.array([self.rng_.gaussian01(), self.rng_.gaussian01(), self.rng_.gaussian01(), \
+                                           self.rng_.gaussian01(), self.rng_.gaussian01(), self.rng_.gaussian01(), self.rng_.gaussian01()]))
 
         # assign the value we generate to state
         state[0] = vec[0]
         state[1] = vec[1]
+        state[2] = vec[2]
+        state[3] = vec[3]
+        state[4] = vec[4]
+        state[5] = vec[5]
+        state[6] = vec[6]
 
         return True
 
@@ -187,6 +188,11 @@ class MyVAEStateSampler(ob.ValidStateSampler):
         # assign the value we generate to state
         state[0] = vec[0]
         state[1] = vec[1]
+        state[2] = vec[2]
+        state[3] = vec[3]
+        state[4] = vec[4]
+        state[5] = vec[5]
+        state[6] = vec[6]
 
         # increase the index
         self.idx_ += 1
