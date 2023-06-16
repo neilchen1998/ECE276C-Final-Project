@@ -137,7 +137,7 @@ class VAE_Generator(Generator):
         else:
             self.dataset = np.load('dataset.npy')
             self.train(1000,4096)
-        self.samples = self.model.generate(np.random.normal(0,3,(3000,LATENT)))
+        self.samples = self.model.generate(np.random.normal(0,3,(9000,LATENT)))
     def generate(self,seed):
         #sample = self.model.generate(seed)
         
@@ -242,19 +242,19 @@ if __name__ == '__main__':
             plt.close()
             #plt.show()'''
     
-    
-    vae = VAE_Generator()
-    #gen = Baseline_Generator()
+    NUM_SAMPLES = 1500
+    # vae = VAE_Generator()
+    gen = Baseline_Generator()
     start_t = time.time_ns()
-    idx = np.random.randint(0, 3000)
+    idx = np.random.randint(0, NUM_SAMPLES)
     outs = np.zeros((7,))
-    for i in range(3000):
-        if i%100==0:
-            print(i)
-        out = vae.generate(idx)
-        idx+=1
-        idx%=3000
-        #out = gen.generate(np.random.normal(0,1,(7,)))
+    for i in range(NUM_SAMPLES):
+        # if i%100==0:
+        #     print(i)
+        # out = vae.generate(idx)
+        # idx+=1
+        # idx%=NUM_SAMPLES
+        out = gen.generate(np.random.normal(0,1,(7,)))
         outs = np.vstack([outs,out])
     elapsed = (time.time_ns()-start_t)/(10**9)
     print(elapsed)

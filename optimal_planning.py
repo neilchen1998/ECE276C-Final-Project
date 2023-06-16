@@ -185,7 +185,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
     myRunTimeCondition = ob.timedPlannerTerminationCondition(runTime)
 
     # define the maximum number of vertices that PRM can generate
-    NUM_VERTICES_THRESHOLD = 3000
+    NUM_VERTICES_THRESHOLD = 8000
 
     # a function that terminate the planner once it exceeds the number of vertices
     def check_cnt():
@@ -210,6 +210,9 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 
     # solve the problem
     solved = optimizingPlanner.solve(myItrCondition)
+
+    # solve the problem without runtime constraint
+    # solved = optimizingPlanner.solve(myRunTimeCondition)
 
     # check if a solution has been found
     if solved:
@@ -260,7 +263,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
 
 if __name__ == "__main__":
 
-    runTime = 60
+    runTime = 1000
     planner = 'PRM'
     objective = 'PathLength'
     s, g = (1.44426457,  0.75387713, -0.93784086, -1.39904889, -2.53033945,  1.29290135, 0.31331037), \
