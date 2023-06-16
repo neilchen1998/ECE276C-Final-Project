@@ -224,7 +224,7 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
         path = pdef.getSolutionPath().printAsMatrix()
 
         # convert it to numpy array type
-        res = np.array(list(map(lambda x: np.fromstring(x, dtype=np.float32, sep=' '), path.split('\n'))))[:-2]
+        res = np.array(list(map(lambda x: np.fromstring(x, dtype=np.float32, sep=' '), path.split('\n'))))[:-7]
         
         # save it to npy file
         np.save('{}.npy'.format(fname), res)
@@ -243,10 +243,15 @@ def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = 
         numSamples = planner_data.numVertices()
 
         # export all samples to an numpy array
-        export = np.zeros((numSamples, 2))
+        export = np.zeros((numSamples, 7))
         for i in range(planner_data.numVertices()):
             export[i, 0] = planner_data.getVertex(i).getState()[0]
             export[i, 1] = planner_data.getVertex(i).getState()[1]
+            export[i, 2] = planner_data.getVertex(i).getState()[2]
+            export[i, 3] = planner_data.getVertex(i).getState()[3]
+            export[i, 4] = planner_data.getVertex(i).getState()[4]
+            export[i, 5] = planner_data.getVertex(i).getState()[5]
+            export[i, 6] = planner_data.getVertex(i).getState()[6]
 
         np.save('{}-samples.npy'.format(fname), export)
 
@@ -260,19 +265,22 @@ if __name__ == "__main__":
     objective = 'PathLength'
     s, g = (1.44426457,  0.75387713, -0.93784086, -1.39904889, -2.53033945,  1.29290135, 0.31331037), \
         (-0.08821695, -1.7245521,   1.01002702, -1.34592485, -1.2625115,   2.06937916, -1.04548166)
-    # fname = 'path-PRM'
+    
+    # call plan function
+    fname = 'path-PRM'
+    start = time.time_ns()
+    plan(runTime, planner, objective, s, g, fname=fname)
+    end = time.time_ns()
+    elapse = (end - start) / 10**9
+    print("time elapsed: {:.5}".format(elapse))
 
-    # start = time.time_ns()
-    # plan(runTime, planner, objective, s, g, fname=fname)
-    # end = time.time_ns()
-    # elapse = (end - start) / 10**9
-    # print("time elapsed: {:.5}".format(elapse))
+    # # call plan function for 8 times
+    # # for training purposes
+    # for i in range(8):
 
-    for i in range(8):
-
-        fname = 'path-PRM-{}'.format(i)
-        start = time.time_ns()
-        plan(runTime, planner, objective, s, g, fname=fname)
-        end = time.time_ns()
-        elapse = (end - start) / 10**9
-        print("time elapsed: {:.5}".format(elapse))
+    #     fname = 'export_panda/path-PRM-{}'.format(i)
+    #     start = time.time_ns()
+    #     plan(runTime, planner, objective, s, g, fname=fname)
+    #     end = time.time_ns()
+    #     elapse = (end - start) / 10**9
+    #     print("time elapsed: {:.5}".format(elapse))
