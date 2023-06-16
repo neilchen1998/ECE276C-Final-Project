@@ -10,8 +10,8 @@ import time
 # from two_link import *
 
 
-HIDDEN = 14
-LATENT = 10
+HIDDEN = 35
+LATENT = 20
 
 class Generator(ABC):
     """
@@ -130,18 +130,18 @@ class VAE_Generator(Generator):
                        (-np.pi, np.pi), (-np.pi, np.pi), (-np.pi, np.pi), (-np.pi, np.pi)]
         self.model = VAE_model(num_joints=7,hidden_size=HIDDEN,latent_size=LATENT)
         files = os.listdir(os.getcwd())
-        pretrained_file = 'pretrained.tar'
+        pretrained_file = 'pretrained_panda.tar'
         if pretrained_file in files:
             checkpoint = torch.load(os.path.join(os.getcwd(),pretrained_file))
             self.model.load_state_dict(checkpoint['model_state_dict'])
         else:
             self.dataset = np.load('dataset.npy')
-            self.train(400,4096)
-        self.samples = self.model.generate(np.random.normal(0,3,(1500,LATENT)))
+            self.train(1000,4096)
+        self.samples = self.model.generate(np.random.normal(0,3,(3000,LATENT)))
     def generate(self,seed):
         #sample = self.model.generate(seed)
         
-        sample = self.samples[np.random.randint(0, 1500),:]
+        sample = self.samples[seed,:]
 
         if self.constraints[0](self.robot.fkine(sample))>=0:
             return sample
@@ -155,9 +155,10 @@ class VAE_Generator(Generator):
         #np.save('generated.npy',generated)
         return projected
     def train(self,num_epochs,samples_per_batch):
-        optim = torch.optim.Adam(self.model.parameters(),lr=0.001,betas=[0.9,0.999999])
+        optim = torch.optim.Adam(self.model.parameters(),lr=0.0001,betas=[0.9,0.999999])
         sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optim,'min',threshold=0.001,min_lr=10**(-10))
         for epoch in range(num_epochs):
+            mse_sum = 0
             self.model.train()
             num_batches = self.dataset.shape[0]//samples_per_batch
             for i in range(num_batches):
@@ -169,6 +170,8 @@ class VAE_Generator(Generator):
                 optim.step()
             batch = torch.from_numpy(self.dataset[i*samples_per_batch:,:]).float()
             batch_hat,mu,sigma = self.model(batch)
+            mse = ((batch - batch_hat)**2).sum()/samples_per_batch
+            mse_sum+=mse.detach().cpu().item()
             loss = ((batch - batch_hat)**2).sum()/samples_per_batch + (sigma**2 + mu**2 - torch.log(sigma) - 1/2).sum()/samples_per_batch
             optim.zero_grad()
             loss.backward()
@@ -178,7 +181,8 @@ class VAE_Generator(Generator):
                 print('batch ',i+1,' of ',num_batches,' in epoch ',epoch)
                 print('training loss: ',loss.item())
         print('done training')
-        torch.save({'model_state_dict':self.model.state_dict()},os.path.join(os.getcwd(),'pretrained.tar'))
+        print(mse_sum/(num_batches))
+        torch.save({'model_state_dict':self.model.state_dict()},os.path.join(os.getcwd(),'pretrained_panda.tar'))
     
 if __name__ == '__main__':
     '''data = np.zeros((1,2))
@@ -202,8 +206,8 @@ if __name__ == '__main__':
     plt.show()
     print(data2)'''
 
-    dataset = np.zeros((2,))
-    root = os.path.join(os.getcwd(),'samples')
+    dataset = np.zeros((7,))
+    root = os.path.join(os.getcwd(),'export_panda')
     files = os.listdir(root)
     for f in files:
         if 'samples' not in f:
@@ -238,17 +242,19 @@ if __name__ == '__main__':
             plt.close()
             #plt.show()'''
     
+    
+    vae = VAE_Generator()
+    #gen = Baseline_Generator()
     start_t = time.time_ns()
-    # vae = VAE_Generator()
-    gen = Baseline_Generator()
-    
-    
+    idx = np.random.randint(0, 3000)
     outs = np.zeros((7,))
-    for i in range(1500):
+    for i in range(3000):
         if i%100==0:
             print(i)
-        # out = vae.generate(np.random.normal(0,1))
-        out = gen.generate(np.random.normal(0,1,(7,)))
+        out = vae.generate(idx)
+        idx+=1
+        idx%=3000
+        #out = gen.generate(np.random.normal(0,1,(7,)))
         outs = np.vstack([outs,out])
     elapsed = (time.time_ns()-start_t)/(10**9)
     print(elapsed)

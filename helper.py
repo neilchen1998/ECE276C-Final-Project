@@ -166,7 +166,7 @@ class MyVAEStateSampler(ob.ValidStateSampler):
         self.name_ = "my VAE sampler"
         self.rng_ = ou.RNG()
         self.gen_ = VAE_Generator()
-        self.idx_ = np.random.randint(0, 1600)
+        self.idx_ = np.random.randint(0, 3000)
 
     def sample(self, state):
     
@@ -192,7 +192,7 @@ class MyVAEStateSampler(ob.ValidStateSampler):
 
         # increase the index
         self.idx_ += 1
-        self.idx_ %= 1500
+        self.idx_ %= 3000
 
         return True
     
