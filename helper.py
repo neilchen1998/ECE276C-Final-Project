@@ -12,10 +12,12 @@ from two_link import *
 
 robot = TwoLink()
 obstacles = []
-obstacles.append(Cuboid(scale=[2, 1, 1],\
-                pose=smb.SE3(0, 18, 0), collision = True))
+# obstacles.append(Cuboid(scale=[2, 1, 1],\
+#                 pose=smb.SE3(0, 18, 0), collision = True))
 
 # source https://ompl.kavrakilab.org/StateSampling_8py_source.html
+
+CONSTRAINT_ANGLE = np.pi/4
 
 class ValidityChecker(ob.StateValidityChecker):
 
@@ -59,7 +61,7 @@ class ValidityChecker(ob.StateValidityChecker):
                     return 0.0
             ang = (np.pi/2) -rot[0]*np.sign(np.sum(rot[1]))
             ang = abs(ang)
-            ang_diff = (np.pi/4)-ang
+            ang_diff = CONSTRAINT_ANGLE - ang
             return ang_diff
 
         return constr2(robot.fkine([x,y])) >= 0

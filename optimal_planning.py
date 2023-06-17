@@ -86,8 +86,8 @@ def allocMyValidStateSampler(si):
     si -- the system info
     """
 
-    return MyBaselineStateSampler(si)
-    # return MyVAEStateSampler(si)
+    # return MyBaselineStateSampler(si)
+    return MyVAEStateSampler(si)
 
   
 def plan(runTime, plannerType, objectiveType, s: tuple = (0.0, 0.0), g: tuple = (1.0, 1.0), fname: str ='export'):
@@ -248,10 +248,14 @@ if __name__ == "__main__":
     planner = 'PRM'
     objective = 'PathLength'
     s, g = (np.pi/4, 0.0), (0.75*np.pi, -np.pi/2)
-    fname = 'path-PRM'
+    # s, g = (np.pi/2,0) , (5*np.pi/8,-np.pi/8)
+    
+    for i in range(1):
 
-    start = time.time_ns()
-    plan(runTime, planner, objective, s, g, fname=fname)
-    end = time.time_ns()
-    elapse = (end - start) / 10**9
-    print("time elapsed: {:.5}".format(elapse))
+        fname = 'constraint-pi-4/VAE/path-PRM-{}'.format(i)
+
+        start = time.time_ns()
+        plan(runTime, planner, objective, s, g, fname=fname)
+        end = time.time_ns()
+        elapse = (end - start) / 10**9
+        print("time elapsed: {:.5}".format(elapse))
